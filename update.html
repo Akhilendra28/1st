@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="../style1.css">
+    <script src="http://login2explore.com/jpdb/resources/js/0.0.3/jpdb-commons.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+</head>
+
+<body>
+    <h1 id="header" style="font-size: 15px;">Update a record</h1>
+    <div class="container">
+        
+        <form id="empForm" method="post">
+            <div class="form-group">
+                <span><label for="empId">Employee ID:</label> <label id="empIdMsg">
+                    </label></span>
+                <input type="text" class="form-control" name="empId" id="empId" placeholder="Enter Employee ID"
+                    required>
+            </div>
+            <div class="form-group">
+                <label for="empName">Employee Name:</label>
+                <input type="text" class="form-control" id="empName"
+                    placeholder="In case you want to change your name, enter your new name here" name="empName">
+            </div>
+            <div class="form-group">
+                <label for="empEmail">Email:</label>
+                <input type="email" class="form-control" id="empEmail"
+                    placeholder="In case you want to change your email ID, enter your new email ID here"
+                    name="empEmail">
+            </div>
+            <input type="button" class="btn btn-primary" id="empSave" value="Save" onclick="updateRecord();">
+        </form>
+    </div>
+    <script>
+        function validateAndGetFormData() {
+            var empIdVar = $("#empId").val();
+            if (empIdVar === "") {
+                alert("Employee ID is a required Value");
+                $("#empId").focus();
+                return "";
+            }
+            var empNameVar = $("#empName").val();
+            var empEmailVar = $("#empEmail").val();
+
+            if (empNameVar === "" && empEmailVar === "") {
+                alert("Enter atleast either a new email ID or a new name to perform an update!");
+                $("#empId").focus();
+                return "";
+            }
+            var jsonStrObj = {
+                empId: empIdVar,
+                empName: empNameVar,
+                empEmail: empEmailVar,
+            };
+            return JSON.stringify(jsonStrObj);
+        }
+
+        function executeCommand(reqString, dbBaseUrl, apiEndPointUrl) {
+            var url = dbBaseUrl + apiEndPointUrl;
+            var jsonObj;
+            $.post(url, reqString, function (result) {
+                jsonObj = JSON.parse(result);
+            }).fail(function (result) {
+                var dataJsonObj = result.responseText;
+                jsonObj = JSON.parse(dataJsonObj);
+            });
+            return jsonObj;
+        }
+        function createUPDATERecordRequest(token, jsonObj, dbName, relName, reqId) {
+            var req = "{\n"
+                + "\"token\" : \""
+                + token
+                + "\","
+                + "\"dbName\": \""
+                + dbName
+                + "\",\n" + "\"cmd\" : \"UPDATE\",\n"
+                + "\"rel\" : \""
+                + relName
+                + "\",\n"
+                + "\"jsonStr\":{ \""
+                + reqId
+                + "\":\n"
+                + jsonObj
+                + "\n"
+                + "}}";
+            return req;
+        }
+
+        function updateRecord() {
+            var jsonStr = validateAndGetFormData();
+            if (jsonStr === "") {
+                return;
+            }
+
+
+
+
+            var removeReqStr = createUPDATERecordRequest("90938372|-31948828420771223|90947484", jsonStr, "Employee", "Emp-rel", parseInt(document.getElementById("empId").value));
+            alert(removeReqStr);
+            jQuery.ajaxSetup({ async: false });
+            var resultObj = executeCommand(removeReqStr,
+                "http://api.login2explore.com:5577", "/api/iml");
+            alert(JSON.stringify(resultObj));
+            jQuery.ajaxSetup({ async: true });
+            resetForm();
+        }
+
+    </script>
+
+    <button id="footer" onclick="location.href='../index.html'">Home</button>
+</body>
+
+</html>
